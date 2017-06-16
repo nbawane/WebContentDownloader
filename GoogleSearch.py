@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 import urllib2
-import Hobby_codes.logger.logger as log
+import logger.logger as log
 import re
 import os
 
@@ -15,6 +15,7 @@ class google:
 		self.dl_list = []
 		self.log = log.log(r'C:\Results\webcrawler')
 		self.sitemap	= {}
+
 	def search(self,series_name):
 		'''
 		gives the search page of google
@@ -28,6 +29,7 @@ class google:
 		# print full_search_url
 		self.send_search_request(full_search_url)
 		return self.get_dls()
+
 	def send_search_request(self,link):
 		'''
 		makes the soup
@@ -47,7 +49,7 @@ class google:
 		'''
 		1. parse the page for hrefs
 		2. get all the links which are dls
-		note : links with dls are condsidered to be download links as of now(assumption)
+		note : links with 'dls' are condsidered to be download links as of now(assumption)
 		:return:
 		'''
 		httpurl = []
@@ -76,7 +78,7 @@ class google:
 		'''
 		method suppose to give sitemap from the patent link
 		:param Parent_link:
-		:return:Not decided yet
+		:return:sitemap dictionary
 		'''
 		child_urls = None
 		print 'in crawler parent link : [%s]'%Parent_link
@@ -84,13 +86,18 @@ class google:
 			print 'sending req for ',Parent_link
 			self.send_search_request(Parent_link)
 			child_urls =  self.get_http(Parent_link)
+			self.sitemap[Parent_link] = child_urls
+
 		except urllib2.HTTPError:
 			print 'Parent link not found "%s" '%Parent_link
 			return
 		finally:
 			self.sitemap[Parent_link] = child_urls
 		for url in child_urls:
+			if url.endswith('.mkv'):
+				return
 			self.Crawler(url)
+		return self.sitemap
 	def print_links(self,link_list):
 		'''
 		prints all the links
@@ -103,7 +110,9 @@ class google:
 			print link
 
 	def get_http(self,Parent_link):
-		'''get child links '''
+		'''
+		get child links and returns as a list
+		'''
 		httpurl = []
 		localurl = []
 		print 'get_http'
@@ -114,5 +123,5 @@ class google:
 		httpurl = httpurl[1:]
 		for index in range(len(httpurl)):
 			httpurl[index] = Parent_link+httpurl[index]
-		print httpurl
+		#print httpurl
 		return httpurl
