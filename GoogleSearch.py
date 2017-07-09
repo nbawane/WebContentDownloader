@@ -23,7 +23,10 @@ class google:
 		:return:
 		'''
 		self.series_name = series_name
-		search_query = 'index+of+'+self.series_name+'&ie=utf-8&oe=utf-8&client=firefox-b-ab'
+		joiner = '+'
+		split_series_name = self.series_name.split()
+		self.series_name = joiner.join(split_series_name)
+		search_query = 'index+of+'+self.series_name
 		google_search_url = 'http://www.google.co.in/search?q='
 		full_search_url = google_search_url+search_query
 		# print full_search_url
@@ -70,7 +73,9 @@ class google:
 		#print self.dl_list
 		for i in self.dl_list:
 			#print 'local url'
-			localurl.append(re.split(self.series_name, i, flags=re.IGNORECASE)[0]+self.series_name+'/')
+			i=i.replace('%2520','%20')
+			i = i.split('&')[0]
+			localurl.append(i)
 		#print localurl
 		return localurl
 
@@ -90,7 +95,7 @@ class google:
 
 		except urllib2.HTTPError:
 			print 'Parent link not found "%s" '%Parent_link
-			return
+			raise
 		finally:
 			self.sitemap[Parent_link] = child_urls
 		for url in child_urls:
